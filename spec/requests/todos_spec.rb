@@ -6,6 +6,9 @@ RSpec.describe "Todos", type: :request do
   describe "GET /todos" do
     it "returns a successful response" do
       get todos_path
+      puts 'sleep'
+      sleep(4)
+      puts 'end'
 
       expect(response).to have_http_status(:ok)
       expect(response.body).to include("Buy milk")
