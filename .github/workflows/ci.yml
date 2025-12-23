@@ -54,7 +54,12 @@ jobs:
         run: bin/rubocop -f github
 
   test:
+    name: Test (rspec ${{ matrix.shard }}/2)
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
 
     # services:
     #  redis:
@@ -75,12 +80,25 @@ jobs:
           ruby-version: .ruby-version
           bundler-cache: true
 
+      - name: Prepare test database
+        env:
+          RAILS_ENV: test
+          # REDIS_URL: redis://localhost:6379/0
+        run: bin/rails db:test:prepare
 
       - name: Run RSpec
         env:
           RAILS_ENV: test
           # REDIS_URL: redis://localhost:6379/0
-        run: bin/rails db:test:prepare && bundle exec rspec
+          RSPEC_TOTAL: "2"
+          RSPEC_INDEX: ${{ matrix.shard }}
+        run: |
+          RSPEC_FILES="$(bundle exec ruby -e 'files = Dir["spec/**/*_spec.rb"].sort; total = ENV.fetch("RSPEC_TOTAL").to_i; index = ENV.fetch("RSPEC_INDEX").to_i - 1; selected = files.each_with_index.select { |_, i| i % total == index }.map(&:first); puts selected.join(" ")')"
+          if [ -z "$RSPEC_FILES" ]; then
+            echo "No spec files for this shard"
+            exit 0
+          fi
+          bundle exec rspec $RSPEC_FILES
 
       - name: Keep screenshots from failed system tests
         uses: actions/upload-artifact@v4
