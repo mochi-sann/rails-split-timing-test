@@ -75,7 +75,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           if-no-files-found: error
-          name: junit-xml-reports${{ matrix.ci_node_index }}
+          name: junit-xml-reports
           path: tmp/junit-xml-reports
 
       - name: Keep screenshots from failed system tests
