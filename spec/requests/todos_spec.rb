@@ -6,7 +6,7 @@ RSpec.describe "Todos", type: :request do
   describe "GET /todos" do
     it "returns a successful response" do
       get todos_path
-      puts 'sleep'
+      puts 'sleep4s'
       sleep(4)
       puts 'end'
 

@@ -7,8 +7,8 @@ RSpec.describe "Todos3", type: :request do
     it "returns a successful response" do
       get(todos_path)
 
-      puts("sleep")
-      sleep(4)
+      puts("sleep20s")
+      sleep(20)
       puts("end")
       expect(response).to(have_http_status(:ok))
       expect(response.body).to(include("Buy milk"))
@@ -19,9 +19,6 @@ RSpec.describe "Todos3", type: :request do
     it "returns a successful response" do
       get(todo_path(todo))
 
-      puts("sleep")
-      sleep(4)
-      puts("end")
       expect(response).to(have_http_status(:ok))
       expect(response.body).to(include("Buy milk"))
     end
