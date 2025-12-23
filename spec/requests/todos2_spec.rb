@@ -7,7 +7,7 @@ RSpec.describe "Todos2", type: :request do
     it "returns a successful response" do
       get(todos_path)
 
-      puts 'sleep'
+      puts 'sleep4s'
       sleep(4)
       puts 'end'
       expect(response).to(have_http_status(:ok))
