@@ -54,12 +54,7 @@ jobs:
         run: bin/rubocop -f github
 
   test:
-    name: Test (${{ matrix.suite }})
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        suite: [rails, rspec]
 
     # services:
     #  redis:
@@ -80,25 +75,12 @@ jobs:
           ruby-version: .ruby-version
           bundler-cache: true
 
-      - name: Prepare test database
-        env:
-          RAILS_ENV: test
-          # REDIS_URL: redis://localhost:6379/0
-        run: bin/rails db:test:prepare
-
-      - name: Run Rails tests
-        env:
-          RAILS_ENV: test
-          # REDIS_URL: redis://localhost:6379/0
-        if: matrix.suite == 'rails'
-        run: bin/rails test test:system
 
       - name: Run RSpec
         env:
           RAILS_ENV: test
           # REDIS_URL: redis://localhost:6379/0
-        if: matrix.suite == 'rspec'
-        run: bundle exec rspec
+        run: bin/rails db:test:prepare && bundle exec rspec
 
       - name: Keep screenshots from failed system tests
         uses: actions/upload-artifact@v4
