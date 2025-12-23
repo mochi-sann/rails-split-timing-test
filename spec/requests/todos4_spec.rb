@@ -1,15 +1,15 @@
 require "rails_helper"
 
-RSpec.describe "Todos3", type: :request do
+RSpec.describe "Todos2", type: :request do
   let!(:todo) { Todo.create!(name: "Buy milk", done: false) }
 
   describe "GET /todos" do
     it "returns a successful response" do
       get(todos_path)
 
-      puts("sleep20s")
-      sleep(20)
-      puts("end")
+      puts 'sleep4s'
+      sleep(4)
+      puts 'end'
       expect(response).to(have_http_status(:ok))
       expect(response.body).to(include("Buy milk"))
     end
