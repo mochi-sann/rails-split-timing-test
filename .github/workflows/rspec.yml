@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    name: Test (rspec ${{ matrix.ci_node_index }}/2)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ci_node_index: [0, 1]
+
+    # services:
+    #  redis:
+    #    image: redis
+    #    ports:
+    #      - 6379:6379
+    #    options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - name: Install packages
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y build-essential git libyaml-dev pkg-config google-chrome-stable
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Download previous JUnit reports
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          branch: main
+          name: junit-xml-reports
+          path: tmp/junit-xml-reports-downloaded
+        continue-on-error: true
+
+      - name: Split RSpec by timings
+        id: split-tests
+        uses: r7kamura/split-tests-by-timings@v0
+        with:
+          reports: tmp/junit-xml-reports-downloaded
+          glob: spec/**/*_spec.rb
+          index: ${{ matrix.ci_node_index }}
+          total: 2
+
+      - name: Prepare test database
+        env:
+          RAILS_ENV: test
+          # REDIS_URL: redis://localhost:6379/0
+        run: bin/rails db:test:prepare
+
+      - name: Run RSpec
+        env:
+          RAILS_ENV: test
+          # REDIS_URL: redis://localhost:6379/0
+        run: |
+          if [ -z "${{ steps.split-tests.outputs.paths }}" ]; then
+            echo "No spec files for this shard"
+            exit 0
+          fi
+          bundle exec rspec \
+            --format progress \
+            --format RspecJunitFormatter \
+            --out tmp/junit-xml-reports/junit-xml-report-${{ matrix.ci_node_index }}.xml \
+            ${{ steps.split-tests.outputs.paths }}
+
+      - name: Upload JUnit reports
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          if-no-files-found: error
+          name: junit-xml-reports
+          path: tmp/junit-xml-reports
+
+      - name: Keep screenshots from failed system tests
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: screenshots
+          path: ${{ github.workspace }}/tmp/screenshots
+          if-no-files-found: ignore
