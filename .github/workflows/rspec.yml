@@ -34,7 +34,7 @@ jobs:
           bundler-cache: true
 
       - name: Download previous JUnit reports
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v11
         with:
           branch: main
           name: junit-xml-reports-0
@@ -42,7 +42,7 @@ jobs:
         continue-on-error: true
 
       - name: Download previous JUnit reports (shard 1)
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v11
         with:
           branch: main
           name: junit-xml-reports-1
