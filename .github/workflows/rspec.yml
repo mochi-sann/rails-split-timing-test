@@ -36,7 +36,6 @@ jobs:
       - name: Download previous JUnit reports
         uses: dawidd6/action-download-artifact@v2
         with:
-          branch: main
           name: junit-xml-reports-0
           path: tmp/junit-xml-reports-downloaded/0
         continue-on-error: true
@@ -44,7 +43,6 @@ jobs:
       - name: Download previous JUnit reports (shard 1)
         uses: dawidd6/action-download-artifact@v2
         with:
-          branch: main
           name: junit-xml-reports-1
           path: tmp/junit-xml-reports-downloaded/1
         continue-on-error: true
